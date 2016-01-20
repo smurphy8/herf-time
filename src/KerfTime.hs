@@ -41,47 +41,131 @@ s: second
 --}
 
 
-data KerfTime = KerfTimeDate UTCTime | KerfTimeTime NominalDiffTime
+-- data KerfTime = KerfTimeDate UTCTime | KerfTimeTime DiffTime
 
- 
+data Kerf = KerfYear   !Integer
+           | KerfMonth !Integer
+           | KerfDay   !Integer
+           | KerfMin   !Integer
+           | KerfHour  !Integer
+           | KerfSec   !Integer
 
-timeOnly :: Integer -> Int -> Int -> KerfTime
-timeOnly h m s = _
+
+-- | HasKerfTime instances have to take care of marshalling on their inputs
+class HasKerfTime a where
+  year   :: a -> Kerf
+  month  :: a -> Kerf
+  day    :: a -> Kerf
+  hour   :: a -> Kerf
+  min    :: a -> Kerf
+  second :: a -> Kerf
+  pico   :: a -> Kerf
+  fromKerf :: Kerf -> a
+  toKerf :: a -> Kerf
 
 
 
--- | dateOnly 2016 01 15 -> KerfTime
 
-dateOnly :: Integer -> Int -> Int -> KerfTime
-dateOnly y m d = KerfTimeDate $ UTCTime dayPart timePart
+
+-- --------------------------------------------------
+-- UTC Time manipulation
+-- ==================================================
+
+-- | date 2016 01 15 -> UTCTime
+date :: Integer -> Integer-> Integer-> UTCTime
+date y m d = UTCTime dayPart timePart
   where
-    dayPart = fromGregorian y m d
+    dayPart = fromGregorian y (fromInteger m) (fromInteger d)
     timePart = 0
 
 
--- | year someKerfTime -> 2016
--- a 0 is returned for a timestamp that has no date
-year :: KerfTime -> Integer
-year kerfTime = case kerfTime of
-   (KerfTimeDate (UTCTime d _)) -> let (year',_ ,_ ) = toGregorian d
-                                   in year'
-   (KerfTimeTime dt) -> 0
+-- | Time only, you can't just add a diff time to a date so we get a diff time back
+--
+time :: Integer -> Integer -> Integer -> DiffTime
+time h m s = secondsToDiffTime ( convertedHours  +
+                                 convertedMinutes +
+                                 convertedSeconds)
+  where
+    convertedHours = h * 3600
+    convertedMinutes = m * 60
+    convertedSeconds = s
+
+
+dateTime :: Integer -> Integer -> Integer ->
+            Integer -> Integer -> Integer -> UTCTime
+dateTime y m d h i s = UTCTime dayPart timePart
+  where
+    dayPart = fromGregorian y (fromInteger m) (fromInteger d)
+    timePart = time h i s
 
 
 
--- | month someKerfTime -> 10
--- a 0 is returned for a timestamp that has no date
-month :: KerfTime -> Int
-month kerfTime = case kerfTime of
-      (KerfTimeDate (UTCTime d _)) -> let (_,month' ,_ ) = toGregorian d
-                                      in month'
-      (KerfTimeTime dt) -> 0
 
--- | day someKerfTime -> 31
--- a 0 is returned for a timestamp that has no date
 
-day :: KerfTime -> Int
-day kerfTime = case kerfTime of
-       (KerfTimeDate (UTCTime d _)) -> let (_,_ ,day' ) = toGregorian d
-                                       in day'
-       (KerfTimeTime dt) -> 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--------------------------------------------------
+-- Retrieval
+--------------------------------------------------
+-- | getYear someUtcTime -> 2016y
+getYear :: UTCTime -> Integer
+getYear incomingTime = case incomingTime of
+   (UTCTime d _) -> let (year',_ ,_ ) = toGregorian d
+                     in year'
+
+
+-- | getMonth someUtcTime -> 10m
+getMonth :: UTCTime -> Integer
+getMonth incomingTime = case incomingTime of
+   (UTCTime d _) -> let (_ , month' ,_ ) = toGregorian d
+                    in  fromIntegral month'
+
+
+-- | getDay someUtcTime -> 31d
+getDay :: UTCTime -> Integer
+getDay incomingTime = case incomingTime of
+   (UTCTime d _) -> let (_ , _ ,day' ) = toGregorian d
+                    in  fromIntegral day'
+
+
+-- | Get all date parts together
+getDateParts :: UTCTime -> (Integer,Integer,Integer)
+getDateParts (UTCTime d _)  = (year',fromIntegral month',fromIntegral day')
+  where
+    (year',month',day') = toGregorian d
+
+-- | getHour someUtcTime -> 1h
+getHour :: UTCTime -> Integer
+getHour (UTCTime _ t) = floor (t / 3600)
+
+-- | getMin someUtcTime -> 37i
+getMin :: UTCTime -> Integer
+getMin u@(UTCTime _ t) = div remainingSeconds 60
+  where
+    timeInSeconds = floor t
+    remainingSeconds = timeInSeconds - secondsInHours
+    secondsInHours = 3600 * (getHour u)
+
+
+-- | getSeconds someUtcTime -> 1s
+getSeconds :: UTCTime -> Integer
+getSeconds u@(UTCTime _ t) = remainingSeconds
+  where
+    timeInSeconds = floor t
+    remainingSeconds = timeInSeconds - secondsInHours - secondsInMinutes
+    secondsInHours = 3600 * (getHour u)
+    secondsInMinutes = 60 * (getMin u)
+
