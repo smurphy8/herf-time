@@ -1,5 +1,5 @@
 Name:                   kerf-time
-Version:                0.0.0
+Version:                0.1.0
 Author:                 Scott Murphy <scottmurphy09@gmail.com>
 Maintainer:             Scott Murphy <scottmurphy09@gmail.com>
 License:                BSD3
@@ -18,6 +18,9 @@ Library
                         KerfTime.Internal
 --  Other-Modules:        
   Build-Depends:        base >= 4 && < 5
+                      , parsec
+                      , time
+                      , text
 -- Test Suite Code
                       , lens
                       , regex-genex
