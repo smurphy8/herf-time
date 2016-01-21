@@ -1,5 +1,7 @@
 # herf-time
 
+[![Circle CI](https://circleci.com/gh/smurphy8/herf-time.svg?style=svg)](https://circleci.com/gh/smurphy8/herf-time)
+
 Haskell's time library is nice but I wanted to be able to do some of the operations in
 the [Kerf](https://github.com/kevinlawler/kerf) programming language.
 
