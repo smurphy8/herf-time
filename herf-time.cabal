@@ -5,6 +5,7 @@ Maintainer:             Scott Murphy <scottmurphy09@gmail.com>
 License:                BSD3
 License-File:           LICENSE
 Synopsis:               haskell time manipulation in a 'kerf like' style.
+Category: Time, Kerf
 Description:
             The herf-time package attempts to make the time package's syntax more straightforward for doing interval math and conversion.
             It borrows heavily from the syntax of the kerf programming language <https://github.com/kevinlawler/kerf> .
