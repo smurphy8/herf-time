@@ -124,7 +124,7 @@ instance KerfedTime UTCTime where
 
 
 -- | Usage: Add Intervals of different amounts
--- >>> date 2016 01 01 `add` (hour 3) `add` (week 16) `add` (month 3)
+-- >>> date 2016 01 01 `add` hour 3 `add` week 16 `add` month 3
 -- UTCKerfTime 2016-07-22 03:00:00 UTC
 
 -- | Represent Time in a few different ways:
