@@ -30,7 +30,7 @@ import           Data.Time
 
 -- | Use negative signs to subtract
 
--- |>>> date 2016 01 01 `add` hour (-3) `add` week (-16) `add` month (-3) :: UTCHerfTime
+-- | >>> date 2016 01 01 `add` hour (-3) `add` week (-16) `add` month (-3) :: UTCHerfTime
 -- UTCHerfTime 2015-06-10 21:00:00 UTC
 
 
