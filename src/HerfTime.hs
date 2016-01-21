@@ -213,6 +213,7 @@ instance FromUTCHerfTime UTCTime where
 -- >>> unherf $ date 2016 01 01 `add` hour 3 `add` week 16 `add` month 3   :: UTCTime
 -- 2016-07-22 03:00:00 UTC
 
+
 instance HerfedTime UTCTime where
   addYear (UTCTime d t) (HerfYear y) = UTCTime (addGregorianYearsRollOver y d) t
   addMonth (UTCTime d t) (HerfMonth m) = UTCTime (addGregorianMonthsRollOver m d) t

@@ -18,32 +18,38 @@ any instance of these 3 classes should satisfy the law:
 
 ### Add Intervals
 ``` haskell
->>> date 2016 01 01 `add` hour 3 `add` week 16 `add` month 3
+>>> date 2016 01 01 `add` hour 3 `add` week 16 `add` month 3 :: UTCTime
 UTCHerfTime 2016-07-22 03:00:00 UTC
 ```
 
 ### Subtract Intervals
 ``` haskell
 
->>> date 2016 01 01 `add` hour (-3) `add` week (-16) `add` month (-3)
+>>> date 2016 01 01 `add` hour (-3) `add` week (-16) `add` month (-3) :: UTCTime
 UTCHerfTime 2015-06-10 21:00:00 UTC
 ```
 
 ### Represent Time in Multiple Ways
 ``` haskell
 
->>> dateTime 2016 01 01 01 23 01 `add` hour 3 `add` week 16 `add` month 3
+>>> dateTime 2016 01 01 01 23 01 `add` hour 3 `add` week 16 `add` month 3 :: UTCTime
 UTCHerfTime 2016-07-22 04:23:01 UTC
->>> dateTimePico 2016 01 01 01 23 01 01 `add` hour 3 `add` week 16 `add` month 3
+>>> dateTimePico 2016 01 01 01 23 01 01 `add` hour 3 `add` week 16 `add` month 3 :: UTCTime
 UTCHerfTime 2016-07-22 04:23:01.000000000001 UTC
 ```
 ### Get Times in any HerfedTime format  (UTC for example)
 ``` haskell
->>> unherf $ date 2016 01 01 `add` hour 3 `add` week 16 `add` month 3   :: UTCTime
+>>> date 2016 01 01 `add` hour 3 `add` week 16 `add` month 3   :: UTCTime
 2016-07-22 03:00:00 UTC
 ```
 
+### Use HerfTime.ZonedTime to convert easily between times
+(reherf $ ( dateTime 2016 01 01 01 01 01 :: HerfZonedTime "CST")) :: HerfZonedTime "PST"
+2015-12-31T23:01:01:PST
+
+
 ### Some fancier examples (Using HerfTime.ZonedTime)
+
 
 ``` haskell
 λ> zt <- getZonedTime
@@ -64,9 +70,7 @@ UTCHerfTime 2016-07-22 04:23:01.000000000001 UTC
 ```
 
 
-### Use HerfTime.ZonedTime to convert easily between times
-(reherf $ ( dateTime 2016 01 01 01 01 01 :: HerfZonedTime "CST")) :: HerfZonedTime "PST"
-2015-12-31T23:01:01:PST
+
 
 ```
 cabal configure --enable-tests && cabal build && cabal test

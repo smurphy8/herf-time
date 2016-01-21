@@ -1,8 +1,10 @@
 {-# LANGUAGE DataKinds                  #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures             #-}
+{-# LANGUAGE PolyKinds                  #-}
 {-# LANGUAGE RankNTypes                 #-}
 {-# LANGUAGE ScopedTypeVariables        #-}
+{-# LANGUAGE TypeFamilies               #-}
 {-# LANGUAGE TypeSynonymInstances       #-}
 {- |
 Module      : HerfTime.LocalTime
@@ -32,14 +34,16 @@ RFC 822 sec. 5: "UT", "GMT", "EST", "EDT", "CST", "CDT", "MST", "MDT", "PST", "P
 module HerfTime.ZonedTime ( HerfZonedTime
                           , toZonedTime
                           , fromZonedTime
-                          , addTimeZone) where
+                          , addTimeZone
+                          , herfz
+                          , reherfz) where
 
-import           Data.Maybe   (fromMaybe)
+import           Control.Applicative ((<|>))
+import           Data.Maybe          (fromMaybe)
 import           Data.Proxy
 import           Data.Time
 import           GHC.TypeLits
 import           HerfTime
-
 
 -- | Zoned Time always has an extra parameter to convert into a fixed time
 
@@ -69,14 +73,14 @@ addTimeZone (UTCTime day' diffTime') = HerfZonedTime zonedTime
 
 
 toZonedTime :: forall z . (KnownSymbol z) =>  UTCTime -> HerfZonedTime z
-toZonedTime time' = HerfZonedTime $ utcToZonedTime tz time'
+toZonedTime time' = HerfZonedTime $ utcToZonedTime (fromMaybe utc . tz $ directSymbolVal) time'
   where
     pz = Proxy  :: Proxy z
-    v = symbolVal pz
-    tz :: TimeZone
-    tz = case (parseTimeM True defaultTimeLocale "%Z" v ) of
-           Just t -> t
-           Nothing -> fromMaybe (error $ "time zone broken " ++ v) (parseTimeM True defaultTimeLocale "%z" v)
+    directSymbolVal = symbolVal pz
+    tz :: String -> Maybe TimeZone
+    tz v = (parseTimeM True defaultTimeLocale "%Z" v ) <|>
+           (parseTimeM True defaultTimeLocale "%z" v)
+
 
 
 fromZonedTime :: forall z . (KnownSymbol z) => HerfZonedTime z -> UTCTime
@@ -115,3 +119,5 @@ herfz = herf . zonedTimeToUTC
 
 reherfz :: FromUTCHerfTime b => ZonedTime -> b
 reherfz = unherf . herfz
+
+
