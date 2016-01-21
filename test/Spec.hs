@@ -1,5 +1,6 @@
-import KerfTimeSpec 
-import Test.Tasty
+import           Test.DocTest
 
 main :: IO ()
-main = defaultMain tests
+main = doctest ["-isrc", "src/KerfTime.hs"]
+
+

@@ -1,79 +1,170 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE PartialTypeSignatures      #-}
-module KerfTime () where
-
-import           Data.Text                              (Text)
-import qualified Data.Text                              as Text
+module KerfTime  where
 import           Data.Time
 
-import           Text.ParserCombinators.Parsec.Language
--- import           KerfTime.Internal
-{--
-
-Fundamental Type:
-  STAMP
-          2015.03.31 or 01:23:45.877 or 2015.03.31T01:23:45.123
-
-
-Time Math:
-
-  2015.04.01 + 1y + 1m + 1d
-    2016.05.02
-
-And 2015.04.01 + 1h2i3s gives 2015.04.01T01:02:03.000.
-
-now_date() + 1d
-  2015.04.02
-
-now_time()
-  21:36:00.762
-
-minus(now_time(), 25 * 1h)
-  20:36:02.005
-
-Possible 'Units'
-y: year
-m: month
-d: day
-h: hour
-i: minute
-s: second
---}
-
-
--- data KerfTime = KerfTimeDate UTCTime | KerfTimeTime DiffTime
-
-data Kerf = KerfYear   !Integer
-           | KerfMonth !Integer
-           | KerfDay   !Integer
-           | KerfMin   !Integer
-           | KerfHour  !Integer
-           | KerfSec   !Integer
-
-
--- | HasKerfTime instances have to take care of marshalling on their inputs
-class HasKerfTime a where
-  year   :: a -> Kerf
-  month  :: a -> Kerf
-  day    :: a -> Kerf
-  hour   :: a -> Kerf
-  min    :: a -> Kerf
-  second :: a -> Kerf
-  pico   :: a -> Kerf
-  fromKerf :: Kerf -> a
-  toKerf :: a -> Kerf
 
 
 
 
 
--- --------------------------------------------------
--- UTC Time manipulation
+
+
+
+newtype UTCKerfTime = UTCKerfTime UTCTime
+  deriving (Eq,Ord,Show)
+
+class (Eq a, Ord a) => ToUTCKerfTime a where
+  kerf :: a -> UTCKerfTime
+
+class FromUTCKerfTime a where
+  unkerf ::  UTCKerfTime -> a
+
+class (ToUTCKerfTime a, FromUTCKerfTime a) => KerfedTime a where
+  addYear :: a -> KerfYear -> a
+  addMonth :: a -> KerfMonth -> a
+  addWeek :: a -> KerfWeek -> a
+  addDay :: a -> KerfDay -> a
+  addHour :: a -> KerfHour -> a
+  addMinute :: a -> KerfMin -> a
+  addSecond :: a -> KerfSec -> a
+  addPicosecond :: a -> KerfPico -> a
+
+
+
+
+
+
+class KerfAdd a where
+  add :: (KerfedTime t) => t -> a -> t
+
+instance KerfAdd KerfYear where
+  add =  addYear
+
+instance KerfAdd KerfMonth where
+  add =  addMonth
+
+instance KerfAdd KerfWeek where
+  add =  addWeek
+
+instance KerfAdd KerfDay where
+  add =  addDay
+
+instance KerfAdd KerfHour where
+  add =  addHour
+
+instance KerfAdd KerfMin where
+  add =  addMinute
+
+instance KerfAdd KerfSec where
+  add =  addSecond
+
+instance KerfAdd KerfPico where
+  add =  addPicosecond
+
+
+
+newtype KerfYear   = KerfYear  Integer
+  deriving (Num,Eq,Ord,Show)
+newtype KerfMonth  = KerfMonth Integer
+  deriving (Num,Eq,Ord,Show)
+newtype KerfWeek = KerfWeek Integer
+  deriving (Num,Eq,Ord,Show)
+newtype KerfDay    = KerfDay   Integer
+  deriving (Num,Eq,Ord,Show)
+newtype KerfMin    = KerfMin   Integer
+  deriving (Num,Eq,Ord,Show)
+newtype KerfHour   = KerfHour  Integer
+  deriving (Num,Eq,Ord,Show)
+newtype KerfSec    = KerfSec   Integer
+  deriving (Num,Eq,Ord,Show)
+newtype KerfPico   = KerfPico  Integer -- Kerf uses nano but whatev
+  deriving (Num, Eq, Ord, Show)
+
+
+-- | NominalKerf time will obey the laws of KerfedTime by default
+instance ToUTCKerfTime UTCKerfTime where
+  kerf = id
+
+instance FromUTCKerfTime UTCKerfTime where
+  unkerf  = id
+
+
+instance KerfedTime UTCKerfTime where
+  addYear (UTCKerfTime k) y = UTCKerfTime $ addYear k y
+  addMonth (UTCKerfTime k) m = UTCKerfTime $ addMonth k m
+  addWeek (UTCKerfTime k) w = UTCKerfTime $ addWeek k w
+  addDay (UTCKerfTime k) d = UTCKerfTime $ addDay k d
+  addHour (UTCKerfTime k) h = UTCKerfTime $ addHour k h
+  addMinute (UTCKerfTime k) i = UTCKerfTime $ addMinute k i
+  addSecond (UTCKerfTime k) s = UTCKerfTime $ addSecond k s
+  addPicosecond (UTCKerfTime k) p = UTCKerfTime $ addPicosecond k p
+
+
+-- | UTCTime is the underlying and most important KerfTime thing
+instance ToUTCKerfTime UTCTime where
+  kerf = UTCKerfTime
+
+instance FromUTCKerfTime UTCTime where
+  unkerf (UTCKerfTime u) = u
+
+
+instance KerfedTime UTCTime where
+  addYear (UTCTime d t) (KerfYear y) = UTCTime (addGregorianYearsRollOver y d) t
+  addMonth (UTCTime d t) (KerfMonth m) = UTCTime (addGregorianMonthsRollOver m d) t
+  addWeek  (UTCTime d t) (KerfWeek w) = UTCTime (addDays (7*w) d) t
+  addDay (UTCTime d t) (KerfDay ds) = UTCTime (addDays ds d) t
+  addHour u (KerfHour h) = addUTCTime (fromIntegral $ h*3600) u
+  addMinute u (KerfMin i) = addUTCTime (fromIntegral $ i*60) u
+  addSecond u (KerfSec s) = addUTCTime (fromIntegral s) u
+  addPicosecond u (KerfPico p) = addUTCTime (toNominal p) u
+    where
+      toNominal = fromRational . toRational .  picosecondsToDiffTime
+
+
+
+
+-- | Usage: Add Intervals of different amounts
+-- >>> date 2016 01 01 `add` (hour 3) `add` (week 16) `add` (month 3)
+-- UTCKerfTime 2016-07-22 03:00:00 UTC
+
+-- | Usage: Use negative signs to subtract
+-- >>> date 2016 01 01 `add` hour (-3) `add` week (-16) `add` month (-3)
+-- UTCKerfTime 2015-06-10 21:00:00 UTC
+
+
+year :: Integer -> KerfYear
+year = KerfYear
+
+month :: Integer -> KerfMonth
+month = KerfMonth
+
+week :: Integer -> KerfWeek
+week = KerfWeek
+
+day :: Integer -> KerfDay
+day = KerfDay
+
+hour :: Integer -> KerfHour
+hour = KerfHour
+
+minute :: Integer -> KerfMin
+minute = KerfMin
+
+second :: Integer -> KerfSec
+second = KerfSec
+
+pico :: Integer -> KerfPico
+pico = KerfPico
+
+
+
+-- ==================================================
+-- Make some KerfTime
 -- ==================================================
 
 -- | date 2016 01 15 -> UTCTime
-date :: Integer -> Integer-> Integer-> UTCTime
-date y m d = UTCTime dayPart timePart
+date :: Integer -> Integer-> Integer-> UTCKerfTime
+date y m d = UTCKerfTime $  UTCTime dayPart timePart
   where
     dayPart = fromGregorian y (fromInteger m) (fromInteger d)
     timePart = 0
@@ -90,14 +181,26 @@ time h m s = secondsToDiffTime ( convertedHours  +
     convertedMinutes = m * 60
     convertedSeconds = s
 
+timePico :: Integer -> Integer -> Integer -> Integer -> DiffTime
+timePico h m s p = picoTime +
+                   (time h m s)
+ where
+   picoTime = picosecondsToDiffTime p
 
 dateTime :: Integer -> Integer -> Integer ->
-            Integer -> Integer -> Integer -> UTCTime
-dateTime y m d h i s = UTCTime dayPart timePart
+            Integer -> Integer -> Integer -> UTCKerfTime
+dateTime y m d h i s = UTCKerfTime $ UTCTime dayPart timePart
   where
     dayPart = fromGregorian y (fromInteger m) (fromInteger d)
     timePart = time h i s
 
+dateTimePico :: Integer -> Integer -> Integer
+             -> Integer -> Integer  -> Integer -> Integer
+             -> UTCKerfTime
+dateTimePico y m d h i s p = UTCKerfTime $ UTCTime dayPart timePart
+  where
+    dayPart = fromGregorian y (fromInteger m) (fromInteger d)
+    timePart = timePico h i s p
 
 
 
@@ -169,3 +272,11 @@ getSeconds u@(UTCTime _ t) = remainingSeconds
     secondsInHours = 3600 * (getHour u)
     secondsInMinutes = 60 * (getMin u)
 
+getPicoseconds :: UTCTime -> Integer
+getPicoseconds u@(UTCTime _ t) = round $ remainingPico *
+                                  (fromRational (10^(12 :: Integer)))
+  where
+    remainingPico = t - (fromIntegral $ secondsInHours - secondsInMinutes - seconds')
+    secondsInHours = 3600 * (getHour u)
+    secondsInMinutes = 60 * (getMin u)
+    seconds' =  getSeconds u

@@ -15,38 +15,14 @@ Library
   HS-Source-Dirs:       src
   GHC-Options:          -Wall
   Exposed-Modules:      KerfTime
-                        KerfTime.Internal
+
 --  Other-Modules:        
   Build-Depends:        base >= 4 && < 5
-                      , parsec
                       , time
-                      , text
--- Test Suite Code
-                      , lens
-                      , regex-genex
-                      , tasty                      
-                      , tasty-golden
-                      , tasty-hunit
-                      , tasty-quickcheck
-                      , QuickCheck
 
-executable kerf-time
-  Default-Language:     Haskell2010
-  HS-Source-Dirs:       src
-  GHC-Options:          -Wall
-  main-is:              Main.hs
-  Build-Depends:        base >= 4 && < 5
-                      , kerf-time
--- Test Suite Code
-                      , lens
-                      , regex-genex
-                      , tasty                      
-                      , tasty-golden
-                      , tasty-hunit
-                      , tasty-quickcheck
-                      , QuickCheck
 
-Test-Suite spec
+
+Test-Suite doctest
   Type:                 exitcode-stdio-1.0
   Default-Language:     Haskell2010
   Hs-Source-Dirs:       src
@@ -54,12 +30,8 @@ Test-Suite spec
   Ghc-Options:          -Wall
   Main-Is:              Spec.hs
   Build-Depends:        base
-                      , regex-genex
-                      , tasty                      
-                      , tasty-golden
-                      , tasty-hunit
-                      , tasty-quickcheck
-                      , QuickCheck
+                      , doctest
+                      , kerf-time
                       
 
 Source-Repository head
