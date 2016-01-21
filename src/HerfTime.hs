@@ -129,8 +129,6 @@ class FromUTCHerfTime a where
   unherf ::  UTCHerfTime -> a
 
 
-
-
 -- | 'reherf' is not part of a typeclass, just more sugar to make dealing with time conversion
 -- If both classes are defined on the same type, the classes should round trip.
 -- e.g.
@@ -140,6 +138,18 @@ class FromUTCHerfTime a where
 reherf :: (ToUTCHerfTime a, ToUTCHerfTime b, FromUTCHerfTime a, FromUTCHerfTime b ) =>
           (a -> b)
 reherf = unherf.herf
+
+
+-- | This defines the time language of herf
+-- the important rule here is path independence
+-- (unherf $ (herf a) `add` i )  == (a `add` i)
+--
+-- This ensures that regardless of how you get to a time
+-- the result will be the same
+--
+-- Something to notice is that rule still allows for lossy
+-- Time Stamps.  The loss just has to be captured uniformally
+-- in the transforms and the interval arithmetic
 
 class (ToUTCHerfTime a, FromUTCHerfTime a) => HerfedTime a where
   addYear :: a -> HerfYear -> a
