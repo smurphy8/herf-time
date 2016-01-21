@@ -9,8 +9,8 @@ I think there is a nice mechanism to do just that.
 
 any instance of these 3 classes should satisfy the law:
 
-* path independant on all addtion 
-* addX a X  == unkerf (addX (kerf a) X )
+* **Path Independant** on all addtion 
+* ``` addX a X  == unkerf (addX (kerf a) X )```
   * where: ``` addX := {addYear , addMonth, addWeek ...}```
 
 
