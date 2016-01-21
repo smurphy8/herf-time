@@ -109,14 +109,33 @@ dateTimePicoHerf y m d h i s p = UTCHerfTime $ UTCTime dayPart timePart
 
 -- --------------------------------------------------
 
+-- | Below are the classes that make up the core of the
+-- HerfTime Library.
+-- Starting with the type 'UTCHerfTime'  which is the
+-- encoding that  most other time stamps pass through
+
 newtype UTCHerfTime = UTCHerfTime UTCTime
   deriving (Eq,Ord,Show,FormatTime)
+
+
+-- | The 'ToUTCHerfTime' is necessary to have an interface 'lifted'
+-- so that all the functions can be abstracted over it
 
 class  ToUTCHerfTime a where
   herf :: a -> UTCHerfTime
 
+
 class FromUTCHerfTime a where
   unherf ::  UTCHerfTime -> a
+
+
+
+
+-- | 'reherf' is not part of a typeclass, just more sugar to make dealing with time conversion
+-- If both classes are defined on the same type, the classes should round trip.
+-- e.g.
+-- (date y m d ):: UTCTime in d == (reherf d))
+
 
 reherf :: (ToUTCHerfTime a, ToUTCHerfTime b, FromUTCHerfTime a, FromUTCHerfTime b ) =>
           (a -> b)
