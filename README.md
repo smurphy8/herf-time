@@ -4,7 +4,7 @@ Haskell's time library is nice but I wanted to be able to do some of the operati
 the Kerf programming language.
 
 
-By creating a set oftype classes: KerfedTime , ToUTCKerfTime, FromUTCKerfTime
+By creating a set of type classes: **KerfedTime** , **ToUTCKerfTime**, **FromUTCKerfTime**
 I think there is a nice mechanism to do just that.
 
 any instance of these 3 classes should satisfy the law:
