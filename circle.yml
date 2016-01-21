@@ -19,8 +19,8 @@ test:
   override:
     - cabal install --enable-tests
     - cabal configure --enable-tests
-    - cabal build
-    - ./dist/build/spec/spec
+    - cabal test
+
 
 ## Uncomment this part if you want automatic Hackage uploads.
 
