@@ -9,18 +9,18 @@ import           Data.Time
 
 
 -- | Usage: Add Intervals of different amounts
--- >>> date 2016 01 01 `add` hour 3 `add` week 16 `add` month 3
+-- >>> date 2016 01 01 `add` hour 3 `add` week 16 `add` month 3 :: UTCKerfTime
 -- UTCKerfTime 2016-07-22 03:00:00 UTC
 
 -- | Represent Time in a few different ways:
--- >>> dateTime 2016 01 01 01 23 01 `add` (hour 3) `add` (week 16) `add` (month 3)
+-- >>> dateTime 2016 01 01 01 23 01 `add` (hour 3) `add` (week 16) `add` (month 3) :: UTCKerfTime
 -- UTCKerfTime 2016-07-22 04:23:01 UTC
--- >>> dateTimePico 2016 01 01 01 23 01 01 `add` (hour 3) `add` (week 16) `add` (month 3)
+-- >>> dateTimePico 2016 01 01 01 23 01 01 `add` (hour 3) `add` (week 16) `add` (month 3) :: UTCKerfTime
 -- UTCKerfTime 2016-07-22 04:23:01.000000000001 UTC
 
 
 -- | Usage: Use negative signs to subtract
--- >>> date 2016 01 01 `add` hour (-3) `add` week (-16) `add` month (-3)
+-- >>> date 2016 01 01 `add` hour (-3) `add` week (-16) `add` month (-3) :: UTCKerfTime
 -- UTCKerfTime 2015-06-10 21:00:00 UTC
 
 
@@ -48,11 +48,11 @@ second = KerfSec
 pico :: Integer -> KerfPico
 pico = KerfPico
 
--- | >>> date 1 1 1
+-- | >>> date 1 1 1 :: UTCKerfTime
 -- UTCKerfTime 0001-01-01 00:00:00 UTC
 
-date :: Integer -> Integer-> Integer-> UTCKerfTime
-date y m d = UTCKerfTime $  UTCTime dayPart timePart
+dateKerf :: Integer -> Integer-> Integer-> UTCKerfTime
+dateKerf y m d = UTCKerfTime $  UTCTime dayPart timePart
   where
     dayPart = fromGregorian y (fromInteger m) (fromInteger d)
     timePart = 0
@@ -77,17 +77,17 @@ timePico h m s p = picoTime +
  where
    picoTime = picosecondsToDiffTime p
 
-dateTime :: Integer -> Integer -> Integer ->
-            Integer -> Integer -> Integer -> UTCKerfTime
-dateTime y m d h i s = UTCKerfTime $ UTCTime dayPart timePart
+dateTimeKerf :: Integer -> Integer -> Integer ->
+                Integer -> Integer -> Integer -> UTCKerfTime
+dateTimeKerf y m d h i s = UTCKerfTime $ UTCTime dayPart timePart
   where
     dayPart = fromGregorian y (fromInteger m) (fromInteger d)
     timePart = time h i s
 
-dateTimePico :: Integer -> Integer -> Integer
-             -> Integer -> Integer  -> Integer -> Integer
-             -> UTCKerfTime
-dateTimePico y m d h i s p = UTCKerfTime $ UTCTime dayPart timePart
+dateTimePicoKerf :: Integer -> Integer -> Integer
+                 -> Integer -> Integer  -> Integer -> Integer
+                 -> UTCKerfTime
+dateTimePicoKerf y m d h i s p = UTCKerfTime $ UTCTime dayPart timePart
   where
     dayPart = fromGregorian y (fromInteger m) (fromInteger d)
     timePart = timePico h i s p
@@ -113,6 +113,11 @@ class (ToUTCKerfTime a, FromUTCKerfTime a) => KerfedTime a where
   addMinute :: a -> KerfMin -> a
   addSecond :: a -> KerfSec -> a
   addPicosecond :: a -> KerfPico -> a
+  date :: KerfYear -> KerfMonth -> KerfDay -> a
+  dateTime :: KerfYear -> KerfMonth -> KerfDay -> KerfHour -> KerfMin -> KerfSec ->  a
+  dateTimePico :: KerfYear -> KerfMonth -> KerfDay -> KerfHour -> KerfMin -> KerfSec -> KerfPico ->  a
+
+
 
 class KerfAdd a where
   add :: (KerfedTime t) => t -> a -> t
@@ -176,8 +181,9 @@ instance KerfedTime UTCKerfTime where
   addMinute (UTCKerfTime k) i = UTCKerfTime $ addMinute k i
   addSecond (UTCKerfTime k) s = UTCKerfTime $ addSecond k s
   addPicosecond (UTCKerfTime k) p = UTCKerfTime $ addPicosecond k p
-
-
+  date (KerfYear y) (KerfMonth m) (KerfDay d) = dateKerf y m d
+  dateTime (KerfYear y) (KerfMonth m) (KerfDay d) (KerfHour h) (KerfMin i) (KerfSec s ) = dateTimeKerf y m d h i s
+  dateTimePico (KerfYear y) (KerfMonth m) (KerfDay d) (KerfHour h) (KerfMin i) (KerfSec s ) (KerfPico p ) = dateTimePicoKerf y m d h i s p
 -- | UTCTime is the underlying and most important KerfTime thing
 instance ToUTCKerfTime UTCTime where
   kerf = UTCKerfTime
@@ -201,7 +207,9 @@ instance KerfedTime UTCTime where
     where
       toNominal = fromRational . toRational .  picosecondsToDiffTime
 
-
+  date (KerfYear y) (KerfMonth m) (KerfDay d) = unkerf $ dateKerf y m d
+  dateTime (KerfYear y) (KerfMonth m) (KerfDay d) (KerfHour h) (KerfMin i) (KerfSec s ) = unkerf $ dateTimeKerf y m d h i s
+  dateTimePico (KerfYear y) (KerfMonth m) (KerfDay d) (KerfHour h) (KerfMin i) (KerfSec s ) (KerfPico p ) = unkerf $ dateTimePicoKerf y m d h i s p
 
 
 
