@@ -1,5 +1,5 @@
 Name:                   herf-time
-Version:                0.1.0
+Version:                0.2.0
 Author:                 Scott Murphy <scottmurphy09@gmail.com>
 Maintainer:             Scott Murphy <scottmurphy09@gmail.com>
 License:                BSD3
@@ -64,6 +64,7 @@ Library
   HS-Source-Dirs:       src
   GHC-Options:          -Wall
   Exposed-Modules:      HerfTime
+                        HerfTime.ZonedTime
 
 --  Other-Modules:        
   Build-Depends:        base >= 4 && < 5
