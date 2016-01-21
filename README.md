@@ -30,6 +30,15 @@ dateTime 2016 01 01 01 23 01 `add` (hour 3) `add` (week 16) `add` (month 3)
 UTCKerfTime 2015-06-10 21:00:00 UTC
 ```
 
+### Represent Time in Multiple Ways
+``` haskell
+Represent Time in a few different ways:
+>>> dateTime 2016 01 01 01 23 01 `add` (hour 3) `add` (week 16) `add` (month 3)
+UTCKerfTime 2016-07-22 04:23:01 UTC
+>>> dateTimePico 2016 01 01 01 23 01 01 `add` (hour 3) `add` (week 16) `add` (month 3)
+UTCKerfTime 2016-07-22 04:23:01.000000000001 UTC
+```
+
 ## How to run tests
 
 ```
