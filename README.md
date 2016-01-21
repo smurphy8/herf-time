@@ -1,7 +1,7 @@
 # herf-time
 
 Haskell's time library is nice but I wanted to be able to do some of the operations in
-the Herf programming language.
+the [Kerf](https://github.com/kevinlawler/kerf) programming language.
 
 
 By creating a set of type classes: **HerfedTime** , **ToUTCHerfTime**, **FromUTCHerfTime**

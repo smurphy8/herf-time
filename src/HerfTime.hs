@@ -1,26 +1,36 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-|
+The Herf Time package is loosely based on the Kerf programming language's approach to time.
+<https://github.com/kevinlawler/kerf>
+
+Where it made sense to do things differently it does.
+
+The fundamental engine is the typeclass "HerfTime" -}
+
+
 module HerfTime  where
 
 import           Data.Time
 
--- | --------------------------------------------------
--- | Herf Time Constructors
--- | --------------------------------------------------
 
 
--- | Usage: Add Intervals of different amounts
--- >>> date 2016 01 01 `add` hour 3 `add` week 16 `add` month 3 :: UTCHerfTime
+
+-- | Add Intervals of different amounts
+
+-- | >>> date 2016 01 01 `add` hour 3 `add` week 16 `add` month 3 :: UTCHerfTime
 -- UTCHerfTime 2016-07-22 03:00:00 UTC
 
--- | Represent Time in a few different ways:
--- >>> dateTime 2016 01 01 01 23 01 `add` (hour 3) `add` (week 16) `add` (month 3) :: UTCHerfTime
+-- | Represent Time in a few different ways
+
+-- | >>> dateTime 2016 01 01 01 23 01 `add` (hour 3) `add` (week 16) `add` (month 3) :: UTCHerfTime
 -- UTCHerfTime 2016-07-22 04:23:01 UTC
 -- >>> dateTimePico 2016 01 01 01 23 01 01 `add` (hour 3) `add` (week 16) `add` (month 3) :: UTCHerfTime
 -- UTCHerfTime 2016-07-22 04:23:01.000000000001 UTC
 
 
--- | Usage: Use negative signs to subtract
--- >>> date 2016 01 01 `add` hour (-3) `add` week (-16) `add` month (-3) :: UTCHerfTime
+-- | Use negative signs to subtract
+
+-- |>>> date 2016 01 01 `add` hour (-3) `add` week (-16) `add` month (-3) :: UTCHerfTime
 -- UTCHerfTime 2015-06-10 21:00:00 UTC
 
 
@@ -98,7 +108,7 @@ dateTimePicoHerf y m d h i s p = UTCHerfTime $ UTCTime dayPart timePart
 newtype UTCHerfTime = UTCHerfTime UTCTime
   deriving (Eq,Ord,Show)
 
-class (Eq a, Ord a) => ToUTCHerfTime a where
+class  ToUTCHerfTime a where
   herf :: a -> UTCHerfTime
 
 class FromUTCHerfTime a where

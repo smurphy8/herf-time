@@ -4,8 +4,31 @@ Author:                 Scott Murphy <scottmurphy09@gmail.com>
 Maintainer:             Scott Murphy <scottmurphy09@gmail.com>
 License:                BSD3
 License-File:           LICENSE
--- Synopsis:               
--- Description:            
+Synopsis:               haskell time manipulation in a 'kerf like' style.
+Description:
+            The herf-time package attempts to make the time package's syntax more straightforward for doing interval math and conversion.
+            It borrows heavily from the syntax of the kerf programming language <https://github.com/kevinlawler/kerf> .
+            But unlike kerf, there are no promisses of high performance code here.
+            The performance seems adequate for lots of uses though and manipulating time in the herf library is pretty fun.
+            .
+            The @KerfTime@ module is self contained and the only dependency is the time package.
+            .
+            Add intervals of varying amounts.
+            .
+            > date 2016 01 01 `add` hour 3 `add` week 16 `add` month 3 :: UTCHerfTime 
+            UTCHerfTime 2016-07-22 03:00:00 UTC
+            .
+            Subtract intervals as well
+            .
+            > date 2016 01 01 `add` hour (-3) `add` week (-16) `add` month (-3) :: UTCHerfTime
+            UTCHerfTime 2015-06-10 21:00:00 UTC
+            .
+            Use the same interval notation for different time representation
+            .
+            > dateTime 2016 01 01 01 23 01 `add` (hour 3) `add` (week 16) `add` (month 3) :: UTCHerfTime
+            UTCHerfTime 2016-07-22 04:23:01 UTC
+            .
+            
 Cabal-Version:          >= 1.10
 Build-Type:             Simple
 Extra-Source-Files:     README.md, ChangeLog.md
@@ -18,7 +41,7 @@ Library
 
 --  Other-Modules:        
   Build-Depends:        base >= 4 && < 5
-                      , time
+                      , time >= 1.5 && < 1.7
 
 
 
@@ -36,4 +59,4 @@ Test-Suite doctest
 
 Source-Repository head
   Type:                 git
---  Location:             
+  Location:             https://github.com/smurphy8/herf-time
