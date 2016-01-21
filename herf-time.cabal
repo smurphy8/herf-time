@@ -1,4 +1,4 @@
-Name:                   kerf-time
+Name:                   herf-time
 Version:                0.1.0
 Author:                 Scott Murphy <scottmurphy09@gmail.com>
 Maintainer:             Scott Murphy <scottmurphy09@gmail.com>
@@ -14,7 +14,7 @@ Library
   Default-Language:     Haskell2010
   HS-Source-Dirs:       src
   GHC-Options:          -Wall
-  Exposed-Modules:      KerfTime
+  Exposed-Modules:      HerfTime
 
 --  Other-Modules:        
   Build-Depends:        base >= 4 && < 5
@@ -31,7 +31,7 @@ Test-Suite doctest
   Main-Is:              Spec.hs
   Build-Depends:        base
                       , doctest
-                      , kerf-time
+                      , herf-time
                       
 
 Source-Repository head
