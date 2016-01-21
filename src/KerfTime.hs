@@ -93,8 +93,6 @@ dateTimePico y m d h i s p = UTCKerfTime $ UTCTime dayPart timePart
     timePart = timePico h i s p
 
 
-
-
 -- --------------------------------------------------
 
 newtype UTCKerfTime = UTCKerfTime UTCTime
