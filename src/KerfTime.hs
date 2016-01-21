@@ -1,14 +1,101 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module KerfTime  where
+
 import           Data.Time
 
+-- | --------------------------------------------------
+-- | Kerf Time Constructors
+-- | --------------------------------------------------
+
+
+-- | Usage: Add Intervals of different amounts
+-- >>> date 2016 01 01 `add` hour 3 `add` week 16 `add` month 3
+-- UTCKerfTime 2016-07-22 03:00:00 UTC
+
+-- | Represent Time in a few different ways:
+-- >>> dateTime 2016 01 01 01 23 01 `add` (hour 3) `add` (week 16) `add` (month 3)
+-- UTCKerfTime 2016-07-22 04:23:01 UTC
+-- >>> dateTimePico 2016 01 01 01 23 01 01 `add` (hour 3) `add` (week 16) `add` (month 3)
+-- UTCKerfTime 2016-07-22 04:23:01.000000000001 UTC
+
+
+-- | Usage: Use negative signs to subtract
+-- >>> date 2016 01 01 `add` hour (-3) `add` week (-16) `add` month (-3)
+-- UTCKerfTime 2015-06-10 21:00:00 UTC
+
+
+year :: Integer -> KerfYear
+year = KerfYear
+
+month :: Integer -> KerfMonth
+month = KerfMonth
+
+week :: Integer -> KerfWeek
+week = KerfWeek
+
+day :: Integer -> KerfDay
+day = KerfDay
+
+hour :: Integer -> KerfHour
+hour = KerfHour
+
+minute :: Integer -> KerfMin
+minute = KerfMin
+
+second :: Integer -> KerfSec
+second = KerfSec
+
+pico :: Integer -> KerfPico
+pico = KerfPico
+
+-- | >>> date 1 1 1
+-- UTCKerfTime 0001-01-01 00:00:00 UTC
+
+date :: Integer -> Integer-> Integer-> UTCKerfTime
+date y m d = UTCKerfTime $  UTCTime dayPart timePart
+  where
+    dayPart = fromGregorian y (fromInteger m) (fromInteger d)
+    timePart = 0
+
+
+-- | Time only, you can't just add a diff time to a date so we get a diff time back
+-- >>> time 1 1 1
+-- 3661s
+time :: Integer -> Integer -> Integer -> DiffTime
+time h m s = secondsToDiffTime ( convertedHours  +
+                                 convertedMinutes +
+                                 convertedSeconds)
+  where
+    convertedHours = h * 3600
+    convertedMinutes = m * 60
+    convertedSeconds = s
+
+
+timePico :: Integer -> Integer -> Integer -> Integer -> DiffTime
+timePico h m s p = picoTime +
+                   (time h m s)
+ where
+   picoTime = picosecondsToDiffTime p
+
+dateTime :: Integer -> Integer -> Integer ->
+            Integer -> Integer -> Integer -> UTCKerfTime
+dateTime y m d h i s = UTCKerfTime $ UTCTime dayPart timePart
+  where
+    dayPart = fromGregorian y (fromInteger m) (fromInteger d)
+    timePart = time h i s
+
+dateTimePico :: Integer -> Integer -> Integer
+             -> Integer -> Integer  -> Integer -> Integer
+             -> UTCKerfTime
+dateTimePico y m d h i s p = UTCKerfTime $ UTCTime dayPart timePart
+  where
+    dayPart = fromGregorian y (fromInteger m) (fromInteger d)
+    timePart = timePico h i s p
 
 
 
 
-
-
-
+-- --------------------------------------------------
 
 newtype UTCKerfTime = UTCKerfTime UTCTime
   deriving (Eq,Ord,Show)
@@ -28,11 +115,6 @@ class (ToUTCKerfTime a, FromUTCKerfTime a) => KerfedTime a where
   addMinute :: a -> KerfMin -> a
   addSecond :: a -> KerfSec -> a
   addPicosecond :: a -> KerfPico -> a
-
-
-
-
-
 
 class KerfAdd a where
   add :: (KerfedTime t) => t -> a -> t
@@ -62,7 +144,6 @@ instance KerfAdd KerfPico where
   add =  addPicosecond
 
 
-
 newtype KerfYear   = KerfYear  Integer
   deriving (Num,Eq,Ord,Show)
 newtype KerfMonth  = KerfMonth Integer
@@ -87,7 +168,6 @@ instance ToUTCKerfTime UTCKerfTime where
 
 instance FromUTCKerfTime UTCKerfTime where
   unkerf  = id
-
 
 instance KerfedTime UTCKerfTime where
   addYear (UTCKerfTime k) y = UTCKerfTime $ addYear k y
@@ -120,96 +200,6 @@ instance KerfedTime UTCTime where
     where
       toNominal = fromRational . toRational .  picosecondsToDiffTime
 
-
-
-
--- | Usage: Add Intervals of different amounts
--- >>> date 2016 01 01 `add` hour 3 `add` week 16 `add` month 3
--- UTCKerfTime 2016-07-22 03:00:00 UTC
-
--- | Represent Time in a few different ways:
--- >>> dateTime 2016 01 01 01 23 01 `add` (hour 3) `add` (week 16) `add` (month 3)
--- UTCKerfTime 2016-07-22 04:23:01 UTC
--- >>> dateTimePico 2016 01 01 01 23 01 01 `add` (hour 3) `add` (week 16) `add` (month 3)
--- UTCKerfTime 2016-07-22 04:23:01.000000000001 UTC
-
-
--- | Usage: Use negative signs to subtract
--- >>> date 2016 01 01 `add` hour (-3) `add` week (-16) `add` month (-3)
--- UTCKerfTime 2015-06-10 21:00:00 UTC
-
-
-
-
-year :: Integer -> KerfYear
-year = KerfYear
-
-month :: Integer -> KerfMonth
-month = KerfMonth
-
-week :: Integer -> KerfWeek
-week = KerfWeek
-
-day :: Integer -> KerfDay
-day = KerfDay
-
-hour :: Integer -> KerfHour
-hour = KerfHour
-
-minute :: Integer -> KerfMin
-minute = KerfMin
-
-second :: Integer -> KerfSec
-second = KerfSec
-
-pico :: Integer -> KerfPico
-pico = KerfPico
-
-
-
--- ==================================================
--- Make some KerfTime
--- ==================================================
-
--- | date 2016 01 15 -> UTCTime
-date :: Integer -> Integer-> Integer-> UTCKerfTime
-date y m d = UTCKerfTime $  UTCTime dayPart timePart
-  where
-    dayPart = fromGregorian y (fromInteger m) (fromInteger d)
-    timePart = 0
-
-
--- | Time only, you can't just add a diff time to a date so we get a diff time back
---
-time :: Integer -> Integer -> Integer -> DiffTime
-time h m s = secondsToDiffTime ( convertedHours  +
-                                 convertedMinutes +
-                                 convertedSeconds)
-  where
-    convertedHours = h * 3600
-    convertedMinutes = m * 60
-    convertedSeconds = s
-
-timePico :: Integer -> Integer -> Integer -> Integer -> DiffTime
-timePico h m s p = picoTime +
-                   (time h m s)
- where
-   picoTime = picosecondsToDiffTime p
-
-dateTime :: Integer -> Integer -> Integer ->
-            Integer -> Integer -> Integer -> UTCKerfTime
-dateTime y m d h i s = UTCKerfTime $ UTCTime dayPart timePart
-  where
-    dayPart = fromGregorian y (fromInteger m) (fromInteger d)
-    timePart = time h i s
-
-dateTimePico :: Integer -> Integer -> Integer
-             -> Integer -> Integer  -> Integer -> Integer
-             -> UTCKerfTime
-dateTimePico y m d h i s p = UTCKerfTime $ UTCTime dayPart timePart
-  where
-    dayPart = fromGregorian y (fromInteger m) (fromInteger d)
-    timePart = timePico h i s p
 
 
 
