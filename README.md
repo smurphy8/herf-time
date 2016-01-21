@@ -22,7 +22,7 @@ any instance of these 3 classes should satisfy the law:
 UTCKerfTime 2016-07-22 03:00:00 UTC
 ```
 
-
+dateTime 2016 01 01 01 23 01 `add` (hour 3) `add` (week 16) `add` (month 3)
 ### Subtract Intervals
 ``` haskell
 
