@@ -16,7 +16,11 @@ any instance of these 3 classes should satisfy the law:
   * where: ``` addX := {addYear , addMonth, addWeek ...}```
 
 
+# Tutorial 
+[Herf Tutorial](http://blog.plowtech.net/posts/herf-time.html)
+
 ## Usage
+
 
 ### Add Intervals
 ``` haskell
