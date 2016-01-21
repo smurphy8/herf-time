@@ -1,6 +1,7 @@
 # Revision history for kerf-time
 
-
+## 0.2.1
+Started using the changelog
 
 ## 0.2.0 
 Fixed module exposed problem
