@@ -43,7 +43,7 @@ UTCHerfTime 2016-07-22 04:23:01.000000000001 UTC
 2016-07-22 03:00:00 UTC
 ```
 
-### Some fancier examples
+### Some fancier examples (Using HerfTime.ZonedTime)
 
 ``` haskell
 λ> zt <- getZonedTime
@@ -57,6 +57,8 @@ UTCHerfTime 2016-07-22 04:23:01.000000000001 UTC
 2016-01-21T11:29:05:CST
 λ> (reherfz zt) `add` month 2 :: HerfZonedTime "CST"
 2016-03-21T11:29:05:CST
+
+-- What time will it be exactly 3 months from now in California?
 λ> (reherfz zt) `add` month 2 :: HerfZonedTime "PST"
 2016-03-21T09:29:05:PST
 ```
