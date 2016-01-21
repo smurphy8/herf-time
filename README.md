@@ -37,6 +37,11 @@ UTCKerfTime 2016-07-22 04:23:01 UTC
 >>> dateTimePico 2016 01 01 01 23 01 01 `add` hour 3 `add` week 16 `add` month 3
 UTCKerfTime 2016-07-22 04:23:01.000000000001 UTC
 ```
+### Get Times in any KerfedTime format  (UTC for example)
+``` haskell
+>>> unkerf $ date 2016 01 01 `add` hour 3 `add` week 16 `add` month 3   :: UTCTime
+2016-07-22 03:00:00 UTC
+```
 
 ## How to run tests
 

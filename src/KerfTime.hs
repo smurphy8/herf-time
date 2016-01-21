@@ -185,6 +185,9 @@ instance ToUTCKerfTime UTCTime where
 instance FromUTCKerfTime UTCTime where
   unkerf (UTCKerfTime u) = u
 
+-- | Get Times in any viable format (UTC for example)
+-- >>> unkerf $ date 2016 01 01 `add` hour 3 `add` week 16 `add` month 3   :: UTCTime
+-- 2016-07-22 03:00:00 UTC
 
 instance KerfedTime UTCTime where
   addYear (UTCTime d t) (KerfYear y) = UTCTime (addGregorianYearsRollOver y d) t
