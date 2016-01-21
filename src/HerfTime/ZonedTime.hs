@@ -16,7 +16,13 @@ Maintainer  : Scott Murphy
 The basic idea is to use the regular local time implementation available in the time library
 but with a few nice wrappers.
 
-For HerfTime to work nicely the information about what makes a time different should reside squarely in the type.
+For HerfTime to work nicely the information about what makes a time different should reside in the type.
+
+in the case of zoned time, this is the time zone:
+
+HerfZonedTime knows about these time zones by name:
+
+RFC 822 sec. 5: "UT", "GMT", "EST", "EDT", "CST", "CDT", "MST", "MDT", "PST", "PDT".
 
 
 
@@ -25,7 +31,8 @@ For HerfTime to work nicely the information about what makes a time different sh
 
 module HerfTime.ZonedTime ( HerfZonedTime
                           , toZonedTime
-                          , fromZonedTime) where
+                          , fromZonedTime
+                          , addTimeZone) where
 
 import           Data.Maybe   (fromMaybe)
 import           Data.Proxy
@@ -36,8 +43,29 @@ import           HerfTime
 
 -- | Zoned Time always has an extra parameter to convert into a fixed time
 
-newtype HerfZonedTime (z::Symbol)  = HerfZonedTime ZonedTime
-  deriving (Show)
+newtype HerfZonedTime (z::Symbol)  = HerfZonedTime {_unherfZonedTime :: ZonedTime}
+  deriving (FormatTime,ParseTime)
+instance (KnownSymbol z) => Show (HerfZonedTime z) where
+  show = herfShow
+
+-- | Add Time Zone is different than converting
+-- It takes a UTCTime and just slaps on the timezone in the ZonedTime field
+-- This is exactly what you want when you are first creating a time
+-- and almost never what you want after!
+
+
+addTimeZone :: forall z. (KnownSymbol z) =>  UTCTime -> HerfZonedTime z
+addTimeZone (UTCTime day' diffTime') = HerfZonedTime zonedTime
+  where
+    zonedTime = ZonedTime localTime timeZone
+    localTime = LocalTime day' (timeToTimeOfDay diffTime')
+    pz = Proxy  :: Proxy z
+    v = symbolVal pz
+    timeZone :: TimeZone
+    timeZone = case (parseTimeM True defaultTimeLocale "%Z" v ) of
+                  Just t -> t
+                  Nothing -> fromMaybe (error $ "time zone broken " ++ v) (parseTimeM True defaultTimeLocale "%z" v)
+
 
 
 toZonedTime :: forall z . (KnownSymbol z) =>  UTCTime -> HerfZonedTime z
@@ -46,9 +74,9 @@ toZonedTime time' = HerfZonedTime $ utcToZonedTime tz time'
     pz = Proxy  :: Proxy z
     v = symbolVal pz
     tz :: TimeZone
-    tz = case (parseTimeM True defaultTimeLocale v "%Z") of
+    tz = case (parseTimeM True defaultTimeLocale "%Z" v ) of
            Just t -> t
-           Nothing -> fromMaybe utc (parseTimeM True defaultTimeLocale v "%z" )
+           Nothing -> fromMaybe (error $ "time zone broken " ++ v) (parseTimeM True defaultTimeLocale "%z" v)
 
 
 fromZonedTime :: forall z . (KnownSymbol z) => HerfZonedTime z -> UTCTime
@@ -62,6 +90,10 @@ instance (KnownSymbol z) =>  ToUTCHerfTime (HerfZonedTime z) where
 instance (KnownSymbol z) => FromUTCHerfTime (HerfZonedTime z) where
   unherf = toZonedTime . unherf
 
+-- |
+-- >>> :set -XDataKinds
+-- >>> (reherf $ ( dateTime 2016 01 01 01 01 01 :: HerfZonedTime "CST")) :: HerfZonedTime "PST"
+-- 2015-12-31T23:01:01:PST
 
 instance (KnownSymbol z) => HerfedTime (HerfZonedTime z) where
   addYear a y  = unherf $ herf a `add` y
@@ -73,5 +105,13 @@ instance (KnownSymbol z) => HerfedTime (HerfZonedTime z) where
   addSecond a s  = unherf $ herf a `add` s
   addPicosecond a p  = unherf $ herf a `add` p
   date y m d = toZonedTime $ date y m d
-  dateTime y m d h i s = toZonedTime $ dateTime y m d h i s
-  dateTimePico y m d h i s p = toZonedTime $ dateTimePico y m d h i s p
+  dateTime y m d h i s = addTimeZone $ dateTime y m d h i s
+  dateTimePico y m d h i s p = addTimeZone $ dateTimePico y m d h i s p
+
+
+-- | Don't want an orphan on ZonedTime so I made herfz
+herfz :: ZonedTime -> UTCHerfTime
+herfz = herf . zonedTimeToUTC
+
+reherfz :: FromUTCHerfTime b => ZonedTime -> b
+reherfz = unherf . herfz

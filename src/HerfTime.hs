@@ -58,6 +58,10 @@ second = HerfSec
 pico :: Integer -> HerfPico
 pico = HerfPico
 
+
+herfShow :: FormatTime t => t -> String
+herfShow = formatTime defaultTimeLocale (iso8601DateFormat (Just "%H:%M:%S:%Z") )  -- i.e. YYYY-MM-DDTHH:MM:SS
+
 -- | >>> date 1 1 1 :: UTCHerfTime
 -- UTCHerfTime 0001-01-01 00:00:00 UTC
 
@@ -106,13 +110,17 @@ dateTimePicoHerf y m d h i s p = UTCHerfTime $ UTCTime dayPart timePart
 -- --------------------------------------------------
 
 newtype UTCHerfTime = UTCHerfTime UTCTime
-  deriving (Eq,Ord,Show)
+  deriving (Eq,Ord,Show,FormatTime)
 
 class  ToUTCHerfTime a where
   herf :: a -> UTCHerfTime
 
 class FromUTCHerfTime a where
   unherf ::  UTCHerfTime -> a
+
+reherf :: (ToUTCHerfTime a, ToUTCHerfTime b, FromUTCHerfTime a, FromUTCHerfTime b ) =>
+          (a -> b)
+reherf = unherf.herf
 
 class (ToUTCHerfTime a, FromUTCHerfTime a) => HerfedTime a where
   addYear :: a -> HerfYear -> a

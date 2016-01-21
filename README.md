@@ -43,7 +43,28 @@ UTCHerfTime 2016-07-22 04:23:01.000000000001 UTC
 2016-07-22 03:00:00 UTC
 ```
 
-## How to run tests
+### Some fancier examples
+
+``` haskell
+λ> zt <- getZonedTime
+λ> herfShow zt
+"2016-01-21T11:29:05:CST"
+λ> reherfz zt :: HerfZonedTime "PST"
+2016-01-21T09:29:05:PST
+λ> reherfz zt :: HerfZonedTime "+0600"
+2016-01-21T23:29:05:+0600
+λ> reherfz zt :: HerfZonedTime "CST"
+2016-01-21T11:29:05:CST
+λ> (reherfz zt) `add` month 2 :: HerfZonedTime "CST"
+2016-03-21T11:29:05:CST
+λ> (reherfz zt) `add` month 2 :: HerfZonedTime "PST"
+2016-03-21T09:29:05:PST
+```
+
+
+### Use HerfTime.ZonedTime to convert easily between times
+(reherf $ ( dateTime 2016 01 01 01 01 01 :: HerfZonedTime "CST")) :: HerfZonedTime "PST"
+2015-12-31T23:01:01:PST
 
 ```
 cabal configure --enable-tests && cabal build && cabal test

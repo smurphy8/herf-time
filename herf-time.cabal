@@ -28,6 +28,31 @@ Description:
             > dateTime 2016 01 01 01 23 01 `add` (hour 3) `add` (week 16) `add` (month 3) :: UTCHerfTime
             UTCHerfTime 2016-07-22 04:23:01 UTC
             .
+            > (reherf $ ( dateTime 2016 01 01 01 01 01 :: HerfZonedTime "CST")) :: HerfZonedTime "PST"
+            2015-12-31T23:01:01:PST
+            .
+            > zt <- getZonedTime
+            .
+            > herfShow zt
+            "2016-01-21T11:29:05:CST"
+            .
+            > reherfz zt :: HerfZonedTime "PST"
+            2016-01-21T09:29:05:PST        
+            .
+            > reherfz zt :: HerfZonedTime "+0600"
+            2016-01-21T23:29:05:+0600
+            .
+            > reherfz zt :: HerfZonedTime "CST"
+            2016-01-21T11:29:05:CST
+            .
+            > (reherfz zt) `add` month 2 :: HerfZonedTime "CST"
+            2016-03-21T11:29:05:CST
+            .
+            > (reherfz zt) `add` month 2 :: HerfZonedTime "PST"
+            2016-03-21T09:29:05:PST
+            .
+                          
+
             
 Cabal-Version:          >= 1.10
 Build-Type:             Simple
