@@ -8,7 +8,42 @@ Where it made sense to do things differently it does.
 The fundamental engine is the typeclass "HerfTime" -}
 
 
-module HerfTime  where
+module HerfTime  ( module Data.Time
+                 , herfShow
+                 , reherf
+                 , getYear
+                 , getMonth
+                 , getDay
+                 , getDateParts
+                 , getHour
+                 , getMin
+                 , getSeconds
+                 , getPicoseconds
+                 , UTCHerfTime
+                 , HerfedTime(..)
+                 , ToUTCHerfTime(..)
+                 , FromUTCHerfTime(..)
+                 , HerfAdd(..)
+                 , HerfYear
+                 , HerfMonth
+                 , HerfWeek
+                 , HerfDay
+                 , HerfHour
+                 , HerfMin
+                 , HerfSec
+                 , HerfPico
+                 , year
+                 , month
+                 , week
+                 , day
+                 , hour
+                 , minute
+                 , second
+                 , pico
+
+
+
+                 ) where
 
 import           Data.Time
 
@@ -33,33 +68,43 @@ import           Data.Time
 -- | >>> date 2016 01 01 `add` hour (-3) `add` week (-16) `add` month (-3) :: UTCHerfTime
 -- UTCHerfTime 2015-06-10 21:00:00 UTC
 
-
+-- | Interface functions following Kerf
+-- y
 year :: Integer -> HerfYear
 year = HerfYear
 
+-- | m
 month :: Integer -> HerfMonth
 month = HerfMonth
 
+-- | w
 week :: Integer -> HerfWeek
 week = HerfWeek
 
+-- | d
 day :: Integer -> HerfDay
 day = HerfDay
 
+-- |h
 hour :: Integer -> HerfHour
 hour = HerfHour
 
+-- |i
 minute :: Integer -> HerfMin
 minute = HerfMin
 
+-- | s
 second :: Integer -> HerfSec
 second = HerfSec
 
+-- | p
 pico :: Integer -> HerfPico
 pico = HerfPico
 
 
-herfShow :: FormatTime t => t -> String
+
+-- | Display herf times in a pre formatted way
+herfShow :: (HerfedTime t, FormatTime t) => t -> String
 herfShow = formatTime defaultTimeLocale (iso8601DateFormat (Just "%H:%M:%S:%Z") )  -- i.e. YYYY-MM-DDTHH:MM:SS
 
 -- | >>> date 1 1 1 :: UTCHerfTime
@@ -125,6 +170,7 @@ class  ToUTCHerfTime a where
   herf :: a -> UTCHerfTime
 
 
+-- | come back from the UTCHerfTime universal represenation
 class FromUTCHerfTime a where
   unherf ::  UTCHerfTime -> a
 
@@ -165,49 +211,78 @@ class (ToUTCHerfTime a, FromUTCHerfTime a) => HerfedTime a where
   dateTimePico :: HerfYear -> HerfMonth -> HerfDay -> HerfHour -> HerfMin -> HerfSec -> HerfPico ->  a
 
 
-
+-- | This provides the unified interface to herfed times.
+-- All instances of this class should obey the rule
+-- that if some interval you are adding is equivalent in another
+-- HerfAdd time then there should be no difference between adding that
+-- many to a HerfedTime
+-- i.e. (HerfMin 1) == (HerfSec 60)
+-- >>> (herf $ add someTime (HerfMin 1) ) == (herf $ add someTime (HerfMin 60))
 class HerfAdd a where
   add :: (HerfedTime t) => t -> a -> t
+
 
 instance HerfAdd HerfYear where
   add =  addYear
 
+
 instance HerfAdd HerfMonth where
   add =  addMonth
+
 
 instance HerfAdd HerfWeek where
   add =  addWeek
 
+
 instance HerfAdd HerfDay where
   add =  addDay
+
 
 instance HerfAdd HerfHour where
   add =  addHour
 
+
 instance HerfAdd HerfMin where
   add =  addMinute
 
+
 instance HerfAdd HerfSec where
   add =  addSecond
+
 
 instance HerfAdd HerfPico where
   add =  addPicosecond
 
 
+-- | Simple representation of a time interval of a year
 newtype HerfYear   = HerfYear  Integer
   deriving (Num,Eq,Ord,Show)
+
+-- | Simple representation of a time interval of a month
 newtype HerfMonth  = HerfMonth Integer
   deriving (Num,Eq,Ord,Show)
+
+-- | Simple representation of a time interval of a week
 newtype HerfWeek = HerfWeek Integer
   deriving (Num,Eq,Ord,Show)
+
+-- | Simple representation of a time interval of a day
 newtype HerfDay    = HerfDay   Integer
   deriving (Num,Eq,Ord,Show)
-newtype HerfMin    = HerfMin   Integer
-  deriving (Num,Eq,Ord,Show)
+
+-- | Simple representation of a time interval of a hour
 newtype HerfHour   = HerfHour  Integer
   deriving (Num,Eq,Ord,Show)
+
+-- | Simple representation of a time interval of a minute
+newtype HerfMin    = HerfMin   Integer
+  deriving (Num,Eq,Ord,Show)
+
+-- | Simple representation of a time interval of a second
 newtype HerfSec    = HerfSec   Integer
   deriving (Num,Eq,Ord,Show)
+
+-- | Simple representation of a time interval of a picosecond
 newtype HerfPico   = HerfPico  Integer -- Herf uses nano but whatev
   deriving (Num, Eq, Ord, Show)
 
@@ -234,6 +309,8 @@ instance HerfedTime UTCHerfTime where
 -- | UTCTime is the underlying and most important HerfTime thing
 instance ToUTCHerfTime UTCTime where
   herf = UTCHerfTime
+
+
 
 instance FromUTCHerfTime UTCTime where
   unherf (UTCHerfTime u) = u
@@ -328,6 +405,8 @@ getSeconds u@(UTCTime _ t) = remainingSeconds
     secondsInHours = 3600 * (getHour u)
     secondsInMinutes = 60 * (getMin u)
 
+
+-- | getPicoseconds somUTCTime -> 1ps
 getPicoseconds :: UTCTime -> Integer
 getPicoseconds u@(UTCTime _ t) = round $ remainingPico *
                                   (fromRational (10^(12 :: Integer)))

@@ -1,4 +1,8 @@
 # Revision history for kerf-time
+## 0.2.2
+* Added HerfedTime constraint to herfShow
+* Restricted exports in HerfTime module
+* exported Time through both HerfTime module and ZonedTime module (to cut down on necessary exports)
 
 ## 0.2.1
 Started using the changelog

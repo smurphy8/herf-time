@@ -32,7 +32,9 @@ module HerfTime.ZonedTime ( HerfZonedTime
                           , fromZonedTime
                           , addTimeZone
                           , herfz
-                          , reherfz) where
+                          , reherfz
+                          , module HerfTime
+                          , module Data.Time) where
 
 import           Control.Applicative ((<|>))
 import           Data.Maybe          (fromMaybe)
@@ -68,6 +70,7 @@ addTimeZone (UTCTime day' diffTime') = HerfZonedTime zonedTime
 
 
 
+-- | Helper function to convert UTCTime to HerfZoned time
 toZonedTime :: forall z . (KnownSymbol z) =>  UTCTime -> HerfZonedTime z
 toZonedTime time' = HerfZonedTime $ utcToZonedTime (fromMaybe utc . tz $ directSymbolVal) time'
   where
@@ -78,7 +81,7 @@ toZonedTime time' = HerfZonedTime $ utcToZonedTime (fromMaybe utc . tz $ directS
            (parseTimeM True defaultTimeLocale "%z" v)
 
 
-
+-- | Getting back from HerfZonedTime to UTCTime
 fromZonedTime :: forall z . (KnownSymbol z) => HerfZonedTime z -> UTCTime
 fromZonedTime (HerfZonedTime time') = zonedTimeToUTC time'
 
@@ -113,6 +116,8 @@ instance (KnownSymbol z) => HerfedTime (HerfZonedTime z) where
 herfz :: ZonedTime -> UTCHerfTime
 herfz = herf . zonedTimeToUTC
 
+
+-- | like 'reherf' but for zoned time (which doesn't have a direct HerfedTime instance)
 reherfz :: FromUTCHerfTime b => ZonedTime -> b
 reherfz = unherf . herfz
 
