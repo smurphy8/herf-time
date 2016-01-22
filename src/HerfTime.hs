@@ -217,7 +217,7 @@ class (ToUTCHerfTime a, FromUTCHerfTime a) => HerfedTime a where
 -- HerfAdd time then there should be no difference between adding that
 -- many to a HerfedTime
 -- i.e. (HerfMin 1) == (HerfSec 60)
--- >>> (herf $ add someTime (HerfMin 1) ) == (herf $ add someTime (HerfMin 60))
+-- (herf $ add someTime (HerfMin 1) ) == (herf $ add someTime (HerfMin 60))
 class HerfAdd a where
   add :: (HerfedTime t) => t -> a -> t
 
