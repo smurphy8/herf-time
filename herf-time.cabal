@@ -1,5 +1,5 @@
 Name:                   herf-time
-Version:                0.2.2
+Version:                0.3.0
 Author:                 Scott Murphy <scottmurphy09@gmail.com>
 Maintainer:             Scott Murphy <scottmurphy09@gmail.com>
 License:                BSD3
@@ -68,8 +68,7 @@ Library
 
 --  Other-Modules:        
   Build-Depends:        base >= 4 && < 5
-                      , time >= 1.5 && < 1.9
-
+                      , time
 
 
 Test-Suite doctest
