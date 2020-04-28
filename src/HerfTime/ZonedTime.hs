@@ -2,6 +2,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures             #-}
 {-# LANGUAGE ScopedTypeVariables        #-}
+{-# LANGUAGE CPP                        #-}
 {- |
 Module      : HerfTime.LocalTime
 Description : LocalTime interpreter for HerfedTime Class
@@ -42,11 +43,29 @@ import           Data.Proxy
 import           Data.Time
 import           GHC.TypeLits
 import           HerfTime
+#if MIN_VERSION_time(1,9,0) && !MIN_VERSION_time(1,10,0)
+import           Data.Time.Format.Internal (ParseTime(..))  
+#endif
+
 
 -- | Zoned Time always has an extra parameter to convert into a fixed time
 
 newtype HerfZonedTime (z::Symbol)  = HerfZonedTime {_unherfZonedTime :: ZonedTime}
-  deriving (FormatTime,ParseTime)
+#if MIN_VERSION_time(1,9,0) && !MIN_VERSION_time(1,10,0)
+  deriving (FormatTime)
+#else
+  deriving (FormatTime, ParseTime)
+#endif
+
+#if MIN_VERSION_time(1,9,0) && !MIN_VERSION_time(1,10,0)
+instance ParseTime (HerfZonedTime z) where
+  buildTime locale fcs =
+    case buildTime locale fcs of
+      Nothing -> Nothing
+      Just zonedTime -> Just $ HerfZonedTime {_unherfZonedTime = zonedTime}
+  parseTimeSpecifier _ = parseTimeSpecifier (undefined :: m (ZonedTime))
+#endif
+
 instance (KnownSymbol z) => Show (HerfZonedTime z) where
   show = herfShow
 
