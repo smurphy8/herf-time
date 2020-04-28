@@ -1,5 +1,6 @@
 # Revision history for kerf-time
-
+## 0.3.1
+* fix `time` dependency to add ParseTime for 1.10 + still backwards compatabile
 ## 0.3.0
 * upgrade to ghc 8.2.2, lts-11.7
 
